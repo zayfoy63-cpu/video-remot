@@ -27,6 +27,7 @@ const FONT = '"Segoe UI", system-ui, -apple-system, sans-serif';
 const SND_SWOOSH = "mixkit-short-wind-swoosh-1461.wav"; // transition de scène
 const SND_POP = "mixkit-message-pop-alert-2354.mp3"; // apparition carte/cercle
 const SND_WHOOSH = "mixkit-arrow-whoosh-1491.wav"; // accent accueil/conclusion
+const SND_MUSIC = "mixkit-what-about-action-474.mp3"; // musique de fond
 
 // Son de transition joué au début d'une scène.
 const TransitionSound = () => <Audio src={staticFile(SND_SWOOSH)} />;
@@ -517,6 +518,9 @@ const SceneAccueil = () => {
 export const CodexIntro = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.bg }}>
+      {/* Musique de fond, discrète, sur toute la durée (bouclée au besoin) */}
+      <Audio src={staticFile(SND_MUSIC)} volume={0.22} loop />
+
       <Sequence from={0} durationInFrames={90}>
         <SceneAccueil />
       </Sequence>
