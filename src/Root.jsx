@@ -26,7 +26,7 @@ export const RemotionRoot = () => {
       <Composition
         id="CodexEcosysteme"
         component={CodexEcosysteme}
-        durationInFrames={900}
+        durationInFrames={1000}
         fps={30}
         width={1920}
         height={1080}

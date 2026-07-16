@@ -26,6 +26,7 @@ const SND_SWOOSH = "mixkit-short-wind-swoosh-1461.wav";
 const SND_POP = "mixkit-message-pop-alert-2354.mp3";
 const SND_WHOOSH = "mixkit-arrow-whoosh-1491.wav";
 const SND_MUSIC = "mixkit-what-about-action-474.mp3";
+const SND_CLICK = "mixkit-fast-double-click-on-mouse-275.wav";
 
 const TransitionSound = () => <Audio src={staticFile(SND_SWOOSH)} />;
 
@@ -319,6 +320,18 @@ const ORBIT_ITEMS = [
   { icon: "📚", label: "Centralisation", color: C.amber },
 ];
 
+// Temps fort : on "clique" sur Entretien et on entre dedans.
+const FOCUS_IN = 135; // début du zoom (double-click)
+const FOCUS_HOLD = 160; // zoom complet, les points apparaissent
+const FOCUS_OUT = 230; // début du retour
+const FOCUS_END = 255; // orbite normale
+
+const ENTRETIEN_POINTS = [
+  "Bilan des problèmes rencontrés",
+  "Documents et outils utilisés",
+  "Qui sont les usagers du Codex",
+];
+
 const Scene3 = () => {
   const frame = useCurrentFrame();
 
@@ -340,11 +353,23 @@ const Scene3 = () => {
   const orbitAngle = frame * 0.55;
   const orbitR = 330;
 
+  // Zoom sur Entretien : 0 (orbite) → 1 (plein écran) → 0 (retour).
+  const focus = interpolate(
+    frame,
+    [FOCUS_IN, FOCUS_HOLD, FOCUS_OUT, FOCUS_END],
+    [0, 1, 1, 0],
+    { ...clamp, easing: Easing.inOut(Easing.cubic) }
+  );
+
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
       <TransitionSound />
       <Sequence from={38} layout="none">
         <Audio src={staticFile(SND_WHOOSH)} />
+      </Sequence>
+      {/* Double-click au moment où l'on entre dans Entretien */}
+      <Sequence from={FOCUS_IN} layout="none">
+        <Audio src={staticFile(SND_CLICK)} />
       </Sequence>
 
       {/* Documents aspirés vers le centre */}
@@ -370,7 +395,7 @@ const Scene3 = () => {
           );
         })}
 
-      {/* Hub central lumineux */}
+      {/* Hub central lumineux (s'estompe pendant le zoom sur Entretien) */}
       <div
         style={{
           position: "absolute",
@@ -378,9 +403,9 @@ const Scene3 = () => {
           height: 190,
           borderRadius: "50%",
           background: `radial-gradient(circle, ${C.white} 0%, ${C.blue} 45%, transparent 72%)`,
-          transform: `scale(${hubIn * (1 + 0.06 * pulse)})`,
+          transform: `scale(${hubIn * (1 + 0.06 * pulse) * (1 - 0.45 * focus)})`,
           boxShadow: `0 0 ${hubGlow}px ${hubGlow / 2}px ${C.blue}66`,
-          opacity: hubIn,
+          opacity: hubIn * (1 - focus),
         }}
       />
       <div
@@ -391,7 +416,7 @@ const Scene3 = () => {
           fontSize: 34,
           fontWeight: 700,
           color: C.bg,
-          opacity: hubIn,
+          opacity: hubIn * (1 - focus),
           transform: `scale(${hubIn})`,
           zIndex: 2,
         }}
@@ -406,20 +431,33 @@ const Scene3 = () => {
           easing: Easing.out(Easing.cubic),
         });
         const a = ((orbitAngle + i * 120) * Math.PI) / 180;
-        const x = Math.cos(a) * orbitR * appear;
-        const y = Math.sin(a) * orbitR * 0.62 * appear;
+        let x = Math.cos(a) * orbitR * appear;
+        let y = Math.sin(a) * orbitR * 0.62 * appear;
+        let scale = appear;
+        let opacity = appear;
+        if (i === 0) {
+          // Entretien : on entre dedans — il vient au centre et grossit.
+          x = lerp(x, 0, focus);
+          y = lerp(y, -150, focus);
+          scale = appear * (1 + 0.9 * focus);
+        } else {
+          // Les autres satellites s'écartent et s'estompent.
+          opacity = appear * (1 - focus);
+          x = x * (1 + 0.35 * focus);
+          y = y * (1 + 0.35 * focus);
+        }
         return (
           <React.Fragment key={it.label}>
             <PopSound delay={70 + i * 18} />
             <div
               style={{
                 position: "absolute",
-                transform: `translate(${x}px, ${y}px) scale(${appear})`,
-                opacity: appear,
+                transform: `translate(${x}px, ${y}px) scale(${scale})`,
+                opacity,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                zIndex: 3,
+                zIndex: i === 0 ? 4 : 3,
               }}
             >
               <div
@@ -454,6 +492,53 @@ const Scene3 = () => {
           </React.Fragment>
         );
       })}
+
+      {/* Contenu de l'Entretien : 3 points en cascade pendant le zoom */}
+      <AbsoluteFill
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          paddingTop: 330,
+          flexDirection: "column",
+          opacity: focus,
+          zIndex: 5,
+        }}
+      >
+        {ENTRETIEN_POINTS.map((p, i) => {
+          const local = frame - FOCUS_HOLD - i * 12;
+          const o = interpolate(local, [0, 15], [0, 1], clamp);
+          const ty = interpolate(local, [0, 15], [26, 0], clamp);
+          return (
+            <div
+              key={p}
+              style={{
+                fontFamily: FONT,
+                fontSize: 40,
+                fontWeight: 500,
+                color: C.white,
+                marginBottom: 26,
+                opacity: o,
+                transform: `translateY(${ty}px)`,
+                display: "flex",
+                alignItems: "center",
+                gap: 18,
+                textShadow: `0 0 18px ${C.blue}88`,
+              }}
+            >
+              <span
+                style={{
+                  color: C.blue,
+                  fontSize: 26,
+                  filter: `drop-shadow(0 0 8px ${C.blue})`,
+                }}
+              >
+                ●
+              </span>
+              {p}
+            </div>
+          );
+        })}
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
@@ -776,16 +861,16 @@ export const CodexEcosysteme = () => {
       <Sequence from={100} durationInFrames={160}>
         <Scene2 />
       </Sequence>
-      <Sequence from={260} durationInFrames={200}>
+      <Sequence from={260} durationInFrames={300}>
         <Scene3 />
       </Sequence>
-      <Sequence from={460} durationInFrames={160}>
+      <Sequence from={560} durationInFrames={160}>
         <Scene4 />
       </Sequence>
-      <Sequence from={620} durationInFrames={160}>
+      <Sequence from={720} durationInFrames={160}>
         <Scene5 />
       </Sequence>
-      <Sequence from={780} durationInFrames={120}>
+      <Sequence from={880} durationInFrames={120}>
         <Scene6 />
       </Sequence>
     </AbsoluteFill>
