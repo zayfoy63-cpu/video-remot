@@ -443,25 +443,79 @@ const Scene5 = () => {
 };
 
 /* ------------------------------------------------------------------ */
+/* Scène d'accueil — Bienvenue                                         */
+/* ------------------------------------------------------------------ */
+
+const SceneAccueil = () => {
+  const scale = usePopScale(0);
+  return (
+    <AbsoluteFill
+      style={{
+        background: COLORS.bg,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+      }}
+    >
+      {/* Son de transition au début de la scène */}
+      {/* <Audio src={staticFile("transition.mp3")} /> */}
+
+      <FadeUp delay={6}>
+        <div
+          style={{
+            fontFamily: FONT,
+            fontSize: 96,
+            fontWeight: 700,
+            color: COLORS.ink,
+            textAlign: "center",
+            letterSpacing: -1,
+            transform: `scale(${scale})`,
+          }}
+        >
+          Bienvenue dans le Codex
+        </div>
+      </FadeUp>
+      <FadeUp delay={24}>
+        <div
+          style={{
+            fontFamily: FONT,
+            fontSize: 40,
+            fontWeight: 400,
+            color: COLORS.soft,
+            textAlign: "center",
+            marginTop: 24,
+          }}
+        >
+          Hébergement ESMS
+        </div>
+      </FadeUp>
+    </AbsoluteFill>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /* Composition                                                         */
 /* ------------------------------------------------------------------ */
 
 export const CodexIntro = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.bg }}>
-      <Sequence from={0} durationInFrames={180}>
+      <Sequence from={0} durationInFrames={90}>
+        <SceneAccueil />
+      </Sequence>
+      <Sequence from={90} durationInFrames={180}>
         <Scene1 />
       </Sequence>
-      <Sequence from={180} durationInFrames={180}>
+      <Sequence from={270} durationInFrames={180}>
         <Scene2 />
       </Sequence>
-      <Sequence from={360} durationInFrames={150}>
+      <Sequence from={450} durationInFrames={150}>
         <Scene3 />
       </Sequence>
-      <Sequence from={510} durationInFrames={150}>
+      <Sequence from={600} durationInFrames={150}>
         <Scene4 />
       </Sequence>
-      <Sequence from={660} durationInFrames={90}>
+      <Sequence from={750} durationInFrames={90}>
         <Scene5 />
       </Sequence>
     </AbsoluteFill>

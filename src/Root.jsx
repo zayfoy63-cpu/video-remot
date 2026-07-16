@@ -17,7 +17,7 @@ export const RemotionRoot = () => {
       <Composition
         id="CodexIntro"
         component={CodexIntro}
-        durationInFrames={750}
+        durationInFrames={840}
         fps={30}
         width={1920}
         height={1080}
