@@ -2,12 +2,12 @@ import React from "react";
 import {
   AbsoluteFill,
   Sequence,
+  Audio,
+  staticFile,
   interpolate,
   spring,
   useCurrentFrame,
   useVideoConfig,
-  // Audio,
-  // staticFile,
 } from "remotion";
 
 const COLORS = {
@@ -22,6 +22,21 @@ const COLORS = {
 };
 
 const FONT = '"Segoe UI", system-ui, -apple-system, sans-serif';
+
+// Fichiers son (dans public/).
+const SND_SWOOSH = "mixkit-short-wind-swoosh-1461.wav"; // transition de scène
+const SND_POP = "mixkit-message-pop-alert-2354.mp3"; // apparition carte/cercle
+const SND_WHOOSH = "mixkit-arrow-whoosh-1491.wav"; // accent accueil/conclusion
+
+// Son de transition joué au début d'une scène.
+const TransitionSound = () => <Audio src={staticFile(SND_SWOOSH)} />;
+
+// Son "pop" calé sur l'apparition d'un élément (à `delay` frames du début).
+const PopSound = ({ delay }) => (
+  <Sequence from={delay} layout="none">
+    <Audio src={staticFile(SND_POP)} />
+  </Sequence>
+);
 
 /**
  * FadeUp — fondu + montée douce (translateY) à l'entrée d'un élément.
@@ -152,14 +167,14 @@ const Scene1 = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.bg }}>
       {/* Son de transition au début de la scène */}
-      {/* <Audio src={staticFile("transition.mp3")} /> */}
+      <TransitionSound />
 
       <SceneTitle>Aujourd'hui : l'information est éparpillée</SceneTitle>
 
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <React.Fragment key={i}>
           {/* Son "pop" à l'apparition de chaque carte */}
-          {/* <Audio src={staticFile("pop.mp3")} startFrom={0} /> */}
+          <PopSound delay={30 + i * 14} />
           <DocCard index={i} delay={30 + i * 14} />
         </React.Fragment>
       ))}
@@ -254,7 +269,7 @@ const Scene2 = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.bg }}>
       {/* Son de transition au début de la scène */}
-      {/* <Audio src={staticFile("transition.mp3")} /> */}
+      <TransitionSound />
 
       <SceneTitle>Une démarche en 3 temps</SceneTitle>
 
@@ -269,7 +284,7 @@ const Scene2 = () => {
           <React.Fragment key={s.title}>
             {i > 0 && <Arrow delay={40 + i * 25} />}
             {/* Son "pop" à l'apparition de chaque carte */}
-            {/* <Audio src={staticFile("pop.mp3")} /> */}
+            <PopSound delay={20 + i * 25} />
             <StepCard {...s} delay={20 + i * 25} />
           </React.Fragment>
         ))}
@@ -335,7 +350,7 @@ const CircleItem = ({ icon, label, color, delay }) => {
 const CircleScene = ({ title, items }) => (
   <AbsoluteFill style={{ background: COLORS.bg }}>
     {/* Son de transition au début de la scène */}
-    {/* <Audio src={staticFile("transition.mp3")} /> */}
+    <TransitionSound />
 
     <SceneTitle>{title}</SceneTitle>
 
@@ -349,7 +364,7 @@ const CircleScene = ({ title, items }) => (
       {items.map((it, i) => (
         <React.Fragment key={it.label}>
           {/* Son "pop" à l'apparition de chaque cercle */}
-          {/* <Audio src={staticFile("pop.mp3")} /> */}
+          <PopSound delay={20 + i * 22} />
           <CircleItem {...it} delay={20 + i * 22} />
         </React.Fragment>
       ))}
@@ -393,8 +408,9 @@ const Scene5 = () => {
         flexDirection: "column",
       }}
     >
-      {/* Son de transition au début de la scène */}
-      {/* <Audio src={staticFile("transition.mp3")} /> */}
+      {/* Son de transition + whoosh d'accentuation */}
+      <TransitionSound />
+      <Audio src={staticFile(SND_WHOOSH)} />
 
       <FadeUp delay={6}>
         <div
@@ -457,8 +473,9 @@ const SceneAccueil = () => {
         flexDirection: "column",
       }}
     >
-      {/* Son de transition au début de la scène */}
-      {/* <Audio src={staticFile("transition.mp3")} /> */}
+      {/* Son de transition + whoosh d'accentuation */}
+      <TransitionSound />
+      <Audio src={staticFile(SND_WHOOSH)} />
 
       <FadeUp delay={6}>
         <div
